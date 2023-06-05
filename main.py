@@ -1,94 +1,70 @@
 from machine_data import resources, MENU
 
-menu_selection = MENU
-ingredient_resources = resources
-def ingredient_check(selected_drink):
+menu = MENU
+machine_resources = resources
+
+
+def ingredient_check(drink_selection):
     """Checks ingredient levels for selected drink"""
-    selection_ingredients = menu_selection[selected_drink]["ingredients"]
+    drink = menu[drink_selection]["ingredients"]
 
-    if selected_drink == "espresso":
-        if ingredient_resources["water"] < selection_ingredients["water"]:
-            print("Sorry there is not enough water.")
-            if ingredient_resources["coffee"] < selection_ingredients["coffee"]:
-                print("Sorry, there is not enough coffee.")
+    for ingredient in drink:
+        if machine_resources[ingredient] < drink[ingredient]:
+            print(f"Sorry there is not enough {ingredient}.")
+            return
         else:
-            ingredient_resources["water"] -= selection_ingredients["water"]
-            ingredient_resources["coffee"] -= selection_ingredients["coffee"]
-            return "collect money"
-    elif selected_drink == "latte":
-        if ingredient_resources["water"] < selection_ingredients["water"]:
-            print("Sorry there is not enough water.")
-            if ingredient_resources["coffee"] < selection_ingredients["coffee"]:
-                print("Sorry, there is not enough coffee.")
-                if ingredient_resources["milk"] < selection_ingredients["milk"]:
-                    print("Sorry, there is not enough water.")
-        else:
-            ingredient_resources["water"] -= selection_ingredients["water"]
-            ingredient_resources["coffee"] -= selection_ingredients["coffee"]
-            ingredient_resources["milk"] -= selection_ingredients["milk"]
-            return "collect money"
-    elif selected_drink == "cappuccino":
-        if ingredient_resources["water"] < selection_ingredients["water"]:
-            print("Sorry there is not enough water.")
-            if ingredient_resources["coffee"] < selection_ingredients["coffee"]:
-                print("Sorry, there is not enough coffee.")
-                if ingredient_resources["milk"] < selection_ingredients["milk"]:
-                    print("Sorry, there is not enough water.")
-        else:
-            ingredient_resources["water"] -= selection_ingredients["water"]
-            ingredient_resources["coffee"] -= selection_ingredients["coffee"]
-            ingredient_resources["milk"] -= selection_ingredients["milk"]
-            return "collect money"
+            machine_resources[ingredient] -= drink[ingredient]
+    return "collect money"
 
-def check_applepay(selected_drink):
+
+def check_applepay(drink_selection):
     print("Please insert coins:")
-    quarters = float(input("How many quarters: "))
-    dimes = float(input("How many dimes: "))
-    nickles = float(input("How many nickles: "))
-    pennies = float(input("How many pennies: "))
+    applepay = float(input("How many quarters: ")) * .25
+    applepay += float(input("How many dimes: ")) * .10
+    applepay += float(input("How many nickles: ")) * .05
+    applepay += float(input("How many pennies: ")) * .01
 
-    drink_cost = menu_selection[selected_drink]["cost"]
-    applepay = (quarters * 0.25) + (dimes * 0.10) + (nickles * 0.05) + (pennies * .01)
+    drink_cost = menu[drink_selection]["cost"]
 
     if applepay == drink_cost:
-        print(f"Here is your {selected_drink}. Enjoy!")
+        print(f"Here is your {drink_selection}. Enjoy!")
         return drink_cost
     elif applepay > drink_cost:
         change = format((applepay - drink_cost), ".2f")
-        print(f"Here is {change} in change.\nHere is your {selected_drink}. Enjoy!")
+        print(f"Here is {change} in change.\nHere is your {drink_selection}. Enjoy!")
         return drink_cost
     else:
         print("Sorry that's not enough money. Money refunded.")
 
 def machine_report(profit):
     profit = format(profit, ".2f")
-    print("Water: " + str(ingredient_resources["water"]) + "ml")
-    print("Milk: " + str(ingredient_resources["milk"]) + "ml")
-    print("Coffee: " + str(ingredient_resources["coffee"]) + "g")
+    print("Water: " + str(machine_resources["water"]) + "ml")
+    print("Milk: " + str(machine_resources["milk"]) + "ml")
+    print("Coffee: " + str(machine_resources["coffee"]) + "g")
     print(f"Money: ${profit}")
 
-def create_drink(selected_drink):
-    if ingredient_check(selected_drink) == "collect money":
-        paid_amount = check_applepay(selected_drink)
+
+def create_drink(drink_selection):
+    if ingredient_check(drink_selection) == "collect money":
+        paid_amount = check_applepay(drink_selection)
         return paid_amount
     else:
         return 0
 
-machine_state = True
+
+machine_on = True
 profit = float(0)
 
 #Start of the Application
-while machine_state:
+while machine_on:
     print("~~~~~~~~~Menu~~~~~~~~~\nEspresso: $1.50\nLatte: $2.50\nCappuccino: $3.00")
-    selected_drink = input("What would you like? (Espresso/Latte/Cappuccino): ").lower()
+    drink_selection = input("What would you like? (Espresso/Latte/Cappuccino): ").lower()
 
-    if selected_drink == 'off':
-        machine_state = False
-    elif selected_drink == 'report':
+    if drink_selection == 'off':
+        machine_on = False
+    elif drink_selection == 'report':
         machine_report(profit)
-    elif selected_drink in ['espresso', 'latte', 'cappuccino']:
-        profit += create_drink(selected_drink)
+    elif drink_selection in ['espresso', 'latte', 'cappuccino']:
+        profit += create_drink(drink_selection)
     else:
         print("Incorrect Menu Option Entered")
-
-
